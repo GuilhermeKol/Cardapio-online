@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital - Faça seu pedido!</title>
+    <style>
+        /* CSS Reset e Estilos Básicos */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #25D366; /* Verde WhatsApp */
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+        }
+        
+        .menu-categories {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            background: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .category-btn.active {
+            background: #25D366;
+            color: white;
+        }
+        
+        .menu-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .menu-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .item-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .item-info {
+            padding: 15px;
+        }
+        
+        .item-title {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .item-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .item-price {
+            font-weight: bold;
+            color: #25D366;
+            font-size: 1.2rem;
+        }
+        
+        .item-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #25D366;
+            color: white;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        .add-to-cart {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        
+        .add-to-cart:hover {
+            background: #128C7E;
+        }
+        
+        .cart-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .cart-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .cart-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-header {
+            background: #25D366;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .cart-items {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-item-info {
+            flex-grow: 1;
+        }
+        
+        .cart-item-title {
+            font-weight: bold;
+        }
+        
+        .cart-item-price {
+            color: #25D366;
+            font-weight: bold;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        
+        .remove-item {
+            background: #ff4757;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-footer {
+            padding: 15px;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .checkout-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+        
+        .checkout-btn:hover {
+            background: #128C7E;
+        }
+        
+        .whatsapp-icon {
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-items {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cardápio Digital</h1>
+            <p>Faça seu pedido pelo WhatsApp!</p>
+        </header>
+        
+        <div class="menu-categories">
+            <button class="category-btn active" data-category="all">Todos</button>
+            <button class="category-btn" data-category="lanches">Lanches</button>
+            <button class="category-btn" data-category="pizzas">Pizzas</button>
+            <button class="category-btn" data-category="bebidas">Bebidas</button>
+            <button class="category-btn" data-category="sobremesas">Sobremesas</button>
+        </div>
+        
+        <div class="menu-items" id="menu-items">
+            <!-- Itens serão adicionados dinamicamente via JavaScript -->
+        </div>
+    </div>
+    
+    <div class="cart-container">
+        <button class="cart-btn" id="cart-btn">
+            🛒
+            <span class="cart-count" id="cart-count">0</span>
+        </button>
+    </div>
+    
+    <div class="cart-modal" id="cart-modal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2>Seu Pedido</h2>
+                <button class="close-cart" id="close-cart">×</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <!-- Itens do carrinho serão adicionados dinamicamente -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total">R$ 0,00</span>
+                </div>
+                <button class="checkout-btn" id="checkout-btn">
+                    <span class="whatsapp-icon">📱</span>
+                    Enviar pedido via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Dados do cardápio
+        const menuItems = [
+            {
+                id: 1,
+                title: "X-Burger",
+                description: "Pão, hambúrguer, queijo, alface e tomate",
+                price: 15.90,
+                category: "lanches",
+                image: "https://source.unsplash.com/random/300x200/?burger"
+            },
+            {
+                id: 2,
+                title: "X-Salada",
+                description: "Pão, hambúrguer, queijo, presunto, alface, tomate e maionese",
+                price: 18.90,
+                category: "lanches",
+                image: "https://source.unsplash.com/random/300x200/?hamburger"
+            },
+            {
+                id: 3,
+                title: "Pizza Margherita",
+                description: "Molho de tomate, mussarela, manjericão e tomate",
+                price: 45.90,
+                category: "pizzas",
+                image: "https://source.unsplash.com/random/300x200/?pizza"
+            },
+            {
+                id: 4,
+                title: "Pizza Calabresa",
+                description: "Molho de tomate, mussarela e calabresa",
+                price: 48.90,
+                category: "pizzas",
+                image: "https://source.unsplash.com/random/300x200/?pepperoni-pizza"
+            },
+            {
+                id: 5,
+                title: "Refrigerante Lata",
+                description: "Coca-Cola, Guaraná ou Fanta Laranja",
+                price: 6.50,
+                category: "bebidas",
+                image: "https://source.unsplash.com/random/300x200/?soda"
+            },
+            {
+                id: 6,
+                title: "Suco Natural",
+                description: "Laranja, abacaxi ou maracujá",
+                price: 8.90,
+                category: "bebidas",
+                image: "https://source.unsplash.com/random/300x200/?juice"
+            },
+            {
+                id: 7,
+                title: "Sorvete",
+                description: "Casquinha com 2 bolas - sabores diversos",
+                price: 9.90,
+                category: "sobremesas",
+                image: "https://source.unsplash.com/random/300x200/?ice-cream"
+            },
+            {
+                id: 8,
+                title: "Brownie",
+                description: "Brownie de chocolate com sorvete",
+                price: 12.90,
+                category: "sobremesas",
+                image: "https://source.unsplash.com/random/300x200/?brownie"
+            }
+        ];
+        
+        // Variáveis globais
+        let cart = [];
+        let currentCategory = "all";
+        
+        // Elementos DOM
+        const menuItemsContainer = document.getElementById("menu-items");
+        const cartCount = document.getElementById("cart-count");
+        const cartBtn = document.getElementById("cart-btn");
+        const cartModal = document.getElementById("cart-modal");
+        const closeCart = document.getElementById("close-cart");
+        const cartItemsContainer = document.getElementById("cart-items");
+        const cartTotal = document.getElementById("cart-total");
+        const checkoutBtn = document.getElementById("checkout-btn");
+        const categoryBtns = document.querySelectorAll(".category-btn");
+        
+        // Inicialização
+        document.addEventListener("DOMContentLoaded", () => {
+            renderMenuItems();
+            setupEventListeners();
+        });
+        
+        // Renderizar itens do menu
+        function renderMenuItems() {
+            menuItemsContainer.innerHTML = "";
+            
+            const filteredItems = currentCategory === "all" 
+                ? menuItems 
+                : menuItems.filter(item => item.category === currentCategory);
+            
+            filteredItems.forEach(item => {
+                const itemElement = document.createElement("div");
+                itemElement.className = "menu-item";
+                itemElement.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}" class="item-image">
+                    <div class="item-info">
+                        <h3 class="item-title">${item.title}</h3>
+                        <p class="item-description">${item.description}</p>
+                        <p class="item-price">R$ ${item.price.toFixed(2).replace(".", ",")}</p>
+                        <div class="item-controls">
+                            <div class="quantity-controls">
+                                <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                                <span class="quantity" data-id="${item.id}">0</span>
+                                <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                            </div>
+                            <button class="add-to-cart" data-id="${item.id}">Adicionar</button>
+                        </div>
+                    </div>
+                `;
+                menuItemsContainer.appendChild(itemElement);
+            });
+            
+            // Atualizar quantidades no menu com base no carrinho
+            updateMenuQuantities();
+        }
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Botões de categoria
+            categoryBtns.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    categoryBtns.forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    currentCategory = btn.dataset.category;
+                    renderMenuItems();
+                });
+            });
+            
+            // Abrir/fechar carrinho
+            cartBtn.addEventListener("click", () => {
+                cartModal.classList.add("active");
+                renderCartItems();
+            });
+            
+            closeCart.addEventListener("click", () => {
+                cartModal.classList.remove("active");
+            });
+            
+            // Fechar modal ao clicar fora
+            cartModal.addEventListener("click", (e) => {
+                if (e.target === cartModal) {
+                    cartModal.classList.remove("active");
+                }
+            });
+            
+            // Botão de checkout
+            checkoutBtn.addEventListener("click", sendOrderViaWhatsApp);
+            
+            // Delegar eventos para elementos dinâmicos
+            document.addEventListener("click", (e) => {
+                // Adicionar ao carrinho
+                if (e.target.classList.contains("add-to-cart")) {
+                    const itemId = parseInt(e.target.dataset.id);
+                    addToCart(itemId);
+                }
+                
+                // Aumentar quantidade
+                if (e.target.classList.contains("plus")) {
+                    const itemId = parseInt(e.target.dataset.id);
+                    addToCart(itemId);
+                }
+                
+                // Diminuir quantidade
+                if (e.target.classList.contains("minus")) {
+                    const itemId = parseInt(e.target.dataset.id);
+                    decreaseQuantity(itemId);
+                }
+            });
+        }
+        
+        // Adicionar item ao carrinho
+        function addToCart(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            const cartItem = cart.find(i => i.id === itemId);
+            
+            if (cartItem) {
+                cartItem.quantity++;
+            } else {
+                cart.push({
+                    ...item,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+        }
+        
+        // Diminuir quantidade do item
+        function decreaseQuantity(itemId) {
+            const cartItemIndex = cart.findIndex(i => i.id === itemId);
+            
+            if (cartItemIndex !== -1) {
+                if (cart[cartItemIndex].quantity > 1) {
+                    cart[cartItemIndex].quantity--;
+                } else {
+                    cart.splice(cartItemIndex, 1);
+                }
+                
+                updateCart();
+            }
+        }
+        
+        // Atualizar carrinho
+        function updateCart() {
+            // Atualizar contador
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // Atualizar quantidades no menu
+            updateMenuQuantities();
+            
+            // Salvar no localStorage
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+        
+        // Atualizar quantidades exibidas no menu
+        function updateMenuQuantities() {
+            const quantityElements = document.querySelectorAll(".quantity");
+            
+            quantityElements.forEach(el => {
+                const itemId = parseInt(el.dataset.id);
+                const cartItem = cart.find(i => i.id === itemId);
+                el.textContent = cartItem ? cartItem.quantity : "0";
+            });
+        }
+        
+        // Renderizar itens no carrinho
+        function renderCartItems() {
+            cartItemsContainer.innerHTML = "";
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = "<p>Seu carrinho está vazio</p>";
+                cartTotal.textContent = "R$ 0,00";
+                return;
+            }
+            
+            cart.forEach(item => {
+                const itemElement = document.createElement("div");
+                itemElement.className = "cart-item";
+                itemElement.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">R$ ${(item.price * item.quantity).toFixed(2).replace(".", ",")}</div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                    </div>
+                    <button class="remove-item" data-id="${item.id}">×</button>
+                `;
+                cartItemsContainer.appendChild(itemElement);
+            });
+            
+            // Calcular total
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = `R$ ${total.toFixed(2).replace(".", ",")}`;
+            
+            // Adicionar evento de remoção
+            document.querySelectorAll(".remove-item").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const itemId = parseInt(btn.dataset.id);
+                    cart = cart.filter(i => i.id !== itemId);
+                    updateCart();
+                    renderCartItems();
+                });
+            });
+        }
+        
+        // Enviar pedido via WhatsApp
+        function sendOrderViaWhatsApp() {
+            if (cart.length === 0) {
+                alert("Adicione itens ao carrinho antes de enviar o pedido!");
+                return;
+            }
+            
+            // Número de telefone (substitua pelo seu número)
+            const phoneNumber = "5511999999999"; // Exemplo: 55 (Brasil) + DDD + número
+            
+            // Criar mensagem
+            let message = "Olá, gostaria de fazer um pedido:\n\n";
+            
+            cart.forEach(item => {
+                message += `- ${item.title} (${item.quantity}x): R$ ${(item.price * item.quantity).toFixed(2).replace(".", ",")}\n`;
+            });
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            message += `\n*Total: R$ ${total.toFixed(2).replace(".", ",")}*`;
+            message += "\n\nObrigado!";
+            
+            // Codificar mensagem para URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Criar link do WhatsApp
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            
+            // Abrir em nova aba
+            window.open(whatsappUrl, "_blank");
+            
+            // Limpar carrinho após enviar
+            cart = [];
+            updateCart();
+            renderCartItems();
+            cartModal.classList.remove("active");
+        }
+    </script>
+</body>
+</html>
